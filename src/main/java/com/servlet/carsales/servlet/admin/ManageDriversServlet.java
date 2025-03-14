@@ -1,6 +1,8 @@
 package com.servlet.carsales.servlet.admin;
 
+import com.servlet.carsales.model.Car;
 import com.servlet.carsales.model.Driver;
+import com.servlet.carsales.service.CarService;
 import com.servlet.carsales.service.DriverService;
 
 import javax.servlet.ServletException;
@@ -15,12 +17,18 @@ import java.util.List;
 @WebServlet("/admin/driver-management")
 public class ManageDriversServlet extends HttpServlet {
 
+
+
     private final DriverService driverService = new DriverService();
+    private final CarService carService = new CarService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Driver> driverList = driverService.getAllDrivers();
+        List<Car> carList = carService.showCarList();// Fetch available cars
+
         request.setAttribute("driverList", driverList);
+        request.setAttribute("carList", carList); // Pass cars to JSP
         request.getRequestDispatcher("/admin/manageDrivers.jsp").forward(request, response);
     }
 

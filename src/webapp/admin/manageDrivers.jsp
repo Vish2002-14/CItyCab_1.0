@@ -1,5 +1,8 @@
+
+
 <%@ page import="com.servlet.carsales.model.Driver" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.servlet.carsales.model.Car" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +17,7 @@
 <div class="container">
     <h1>Driver Management</h1>
 
+    <%-- Display Error Messages (if any) --%>
     <%
         String errorMessage = (String) session.getAttribute("errorMessage");
         if (errorMessage != null) {
@@ -25,7 +29,6 @@
             session.removeAttribute("errorMessage"); // Clear message after displaying
         }
     %>
-
 
     <style>
         .error-message {
@@ -40,7 +43,7 @@
         }
     </style>
 
-    <!-- Driver Form -->
+    <%-- Driver Form --%>
     <form id="driverForm" action="<%= request.getContextPath() %>/admin/driver-management" method="post">
         <h2 id="formTitle">Add New Driver</h2>
 
@@ -58,14 +61,34 @@
         <label for="phoneNumber">Phone Number:</label>
         <input type="text" id="phoneNumber" name="phoneNumber" required>
 
-        <label for="carId">Assigned Car ID:</label>
-        <input type="number" id="carId" name="carId" required>
+        <%
+            if (request.getAttribute("carList") == null) {
+                response.sendRedirect("driver-management");
+                return;
+            }
+        %>
+
+        <%-- Car Assignment Dropdown --%>
+        <label for="carId">Assign Car:</label>
+        <select id="carId" name="carId" required <%= (request.getAttribute("carList") == null || ((List<Car>) request.getAttribute("carList")).isEmpty()) ? "disabled" : "" %>>
+            <%
+                List<Car> carList = (List<Car>) request.getAttribute("carList");
+                if (carList == null || carList.isEmpty()) {
+            %>
+            <option value="">No cars available</option>
+            <% } else { %>
+            <option value="">-- Select Car --</option>
+            <% for (Car car : carList) { %>
+            <option value="<%= car.getId() %>"><%= car.getCarNumber() %> - <%= car.getModel() %></option>
+            <% } %>
+            <% } %>
+        </select>
 
         <input type="hidden" id="action" name="action" value="add">
-        <button type="submit" id="submitButton">Add Driver</button>
+        <button type="submit" id="submitButton" <%= (carList == null || carList.isEmpty()) ? "disabled" : "" %>>Add Driver</button>
     </form>
 
-    <!-- Driver Table -->
+    <%-- Driver Details Table --%>
     <h2>Driver Details</h2>
     <table id="driverTable">
         <thead>
@@ -80,14 +103,8 @@
         </thead>
         <tbody>
         <%
-            if (request.getAttribute("driverList") == null) {
-                response.sendRedirect("driver-management");
-                return;
-            }
-        %>
-        <%
             List<Driver> driverList = (List<Driver>) request.getAttribute("driverList");
-            if (driverList != null) {
+            if (driverList != null && !driverList.isEmpty()) {
                 for (Driver driver : driverList) {
         %>
         <tr>
@@ -121,3 +138,4 @@
 <script src="js/manageDriver.js"></script>
 </body>
 </html>
+
